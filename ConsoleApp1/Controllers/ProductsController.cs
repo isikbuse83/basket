@@ -10,9 +10,9 @@ namespace ConsoleApp1.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly BusketDb _context;
+    private readonly BasketDb _context;
 
-    public ProductsController(BusketDb context)
+    public ProductsController(BasketDb context)
     {
         _context = context;
     }

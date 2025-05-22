@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<BusketDb>(options =>
+builder.Services.AddDbContext<BasketDb>(options =>
     options.UseInMemoryDatabase("BusketDb"));
 
 var app = builder.Build();

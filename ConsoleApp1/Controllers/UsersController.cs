@@ -10,9 +10,9 @@ namespace ConsoleApp1.Controllers;
 
 public class UsersController : ControllerBase
 {
-    private readonly BusketDb _db;
+    private readonly BasketDb _db;
 
-    public UsersController(BusketDb db)
+    public UsersController(BasketDb db)
     {
         _db = db;
     }

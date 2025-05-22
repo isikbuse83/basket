@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "KXU7dUYgWCU=",
+  "dgSpecHash": "1bPB3t7gcI8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\isikb\\OneDrive\\Masaüstü\\Busket\\ConsoleApp1\\ConsoleApp1.csproj",
+  "projectFilePath": "C:\\Users\\isikb\\OneDrive\\Masaüstü\\Basket\\ConsoleApp1\\ConsoleApp1.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\isikb\\.nuget\\packages\\microsoft.entityframeworkcore\\8.0.5\\microsoft.entityframeworkcore.8.0.5.nupkg.sha512",
     "C:\\Users\\isikb\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\8.0.5\\microsoft.entityframeworkcore.abstractions.8.0.5.nupkg.sha512",

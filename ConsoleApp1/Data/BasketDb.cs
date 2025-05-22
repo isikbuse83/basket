@@ -1,9 +1,9 @@
 ﻿using ConsoleApp1.Informations;
 using Microsoft.EntityFrameworkCore;
 
-public class BusketDb : DbContext
+public class BasketDb : DbContext
 {
-    public BusketDb(DbContextOptions<BusketDb> options)
+    public BasketDb(DbContextOptions<BasketDb> options)
         : base(options) { }
 
     public DbSet<Product> Products => Set<Product>(); 
