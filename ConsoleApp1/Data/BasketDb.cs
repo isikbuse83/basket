@@ -10,5 +10,6 @@ namespace ConsoleApp1.Data
 
         public DbSet<Product> Products => Set<Product>(); 
         public DbSet<User> Users => Set<User>();
+        public DbSet<Basket> Basket { get; set; } 
     }
 }
