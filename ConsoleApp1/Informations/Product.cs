@@ -8,3 +8,4 @@ public class Product
     public decimal ProductPrice { get; set; }
     public int ProductStock { get; set; }
 }
+

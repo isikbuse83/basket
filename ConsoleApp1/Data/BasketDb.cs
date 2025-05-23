@@ -1,12 +1,14 @@
-﻿using ConsoleApp1.Informations;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using ConsoleApp1.Informations; 
 
-public class BasketDb : DbContext
+namespace ConsoleApp1.Data
 {
-    public BasketDb(DbContextOptions<BasketDb> options)
-        : base(options) { }
+    public class BasketDb : DbContext
+    {
+        public BasketDb(DbContextOptions<BasketDb> options)
+            : base(options) { }
 
-    public DbSet<Product> Products => Set<Product>(); 
-   public DbSet<User> Users => Set<User>();
+        public DbSet<Product> Products => Set<Product>(); 
+        public DbSet<User> Users => Set<User>();
+    }
 }
-

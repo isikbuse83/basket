@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using ConsoleApp1.Informations;
+using ConsoleApp1.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

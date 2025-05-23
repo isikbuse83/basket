@@ -6,10 +6,11 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.5" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.0.5" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.0.5" />
     </ItemGroup>
 
 </Project>
