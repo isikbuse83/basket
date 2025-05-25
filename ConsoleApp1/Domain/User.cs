@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace ConsoleApp1.Informations;
+namespace ConsoleApp1.Domain;
 
 public class User
 {

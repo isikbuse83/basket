@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ConsoleApp1.Informations; 
+using ConsoleApp1.Domain;
+using ConsoleApp1.Domain;
 
 namespace ConsoleApp1.Data
 {

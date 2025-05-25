@@ -1,7 +1,8 @@
 ﻿
 using System.Collections.Generic;
+using ConsoleApp1.Domain;
 
-namespace ConsoleApp1.Informations;
+namespace ConsoleApp1.Domain;
 
 public class Basket
 {

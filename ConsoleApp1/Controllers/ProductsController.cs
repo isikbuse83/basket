@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using ConsoleApp1.Data;
-using ConsoleApp1.Informations;
+using ConsoleApp1.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,7 +59,8 @@ public class ProductsController : ControllerBase
         product.ProductName = updated.ProductName;
         product.ProductDescription = updated.ProductDescription;
         product.ProductPrice = updated.ProductPrice;
-        product.ProductStock = updated.ProductStock;
+        
+        product.SetStock(updated.ProductStock);
 
         await _context.SaveChangesAsync();
         return NoContent();

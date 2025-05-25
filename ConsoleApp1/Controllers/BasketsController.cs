@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using ConsoleApp1.Informations;
+using ConsoleApp1.Domain;
 using ConsoleApp1.Data;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +53,7 @@ public class BasketsController: ControllerBase
         }
         
         basket.Products.Add(product);
-        product.ProductStock -= 1;
+        product.DecreaseStock();
         
         await _db.SaveChangesAsync();
         return Ok("ürün sepete eklendi");
@@ -78,7 +78,7 @@ public class BasketsController: ControllerBase
             return NotFound("ürün sepette yok ");
         }
         basket.Products.Remove(product);
-        product.ProductStock += 1;
+        product.IncreaseStock();
         
         await _db.SaveChangesAsync();
         
@@ -100,7 +100,7 @@ public class BasketsController: ControllerBase
 
         foreach (var product in basket.Products)
         {
-            product.ProductStock += 1;
+            product.IncreaseStock();
         }
         
         basket.Products.Clear();
