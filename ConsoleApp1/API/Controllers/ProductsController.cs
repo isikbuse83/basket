@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ConsoleApp1.Data;
-using ConsoleApp1.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ConsoleApp1.Domain;
+using ConsoleApp1.Data;
+
 
 namespace ConsoleApp1.Controllers;
 
@@ -38,6 +39,7 @@ public class ProductsController : ControllerBase
     {
         try
         {
+            product.SetStock(product.WarehouseStock); // hem Warehouse hem DynamicStock ayarlanır
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
@@ -49,7 +51,6 @@ public class ProductsController : ControllerBase
         }
     }
 
-
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, Product updated)
     {
@@ -59,8 +60,8 @@ public class ProductsController : ControllerBase
         product.ProductName = updated.ProductName;
         product.ProductDescription = updated.ProductDescription;
         product.ProductPrice = updated.ProductPrice;
-        
-        product.SetStock(updated.ProductStock);
+
+        product.SetWarehouseStock(updated.WarehouseStock);
 
         await _context.SaveChangesAsync();
         return NoContent();
@@ -77,4 +78,3 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 }
-

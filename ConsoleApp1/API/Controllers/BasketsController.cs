@@ -41,25 +41,23 @@ public class BasketsController: ControllerBase
             .FirstOrDefaultAsync(b => b.UserId == userId);
 
         var product = await _db.Products.FindAsync(productId);
-
+        
         if (basket == null || product == null)
         {
-            return NotFound("Sepet bulunamadı");
+            return NotFound("Sepet veya ürün bulunamadı");
         }
 
-        if (product.ProductStock <= 0)
+        if (!product.DecreaseDynamicStock())
         {
-            return BadRequest("ürün bulunmadı ");
+            return BadRequest("Yetersiz stok");
         }
-        
+
         basket.Products.Add(product);
-        product.DecreaseStock();
-        
         await _db.SaveChangesAsync();
-        return Ok("ürün sepete eklendi");
 
+        return Ok("Ürün sepete eklendi");
     }
-
+    
     [HttpDelete("{userId}/remove/{productId}")]
     public async Task<ActionResult> RemoveBasket(int userId, int productId)
     {
@@ -71,25 +69,26 @@ public class BasketsController: ControllerBase
         {
             return NotFound("Sepet bulunamadı");
         }
+
         var product = await _db.Products.FindAsync(productId);
 
-        if (product == null)
+        if (product == null || !basket.Products.Contains(product))
         {
-            return NotFound("ürün sepette yok ");
+            return NotFound("Ürün sepette bulunamadı");
         }
+
         basket.Products.Remove(product);
-        product.IncreaseStock();
-        
+        product.IncreaseDynamicStock();
+
         await _db.SaveChangesAsync();
-        
-        return Ok("sepetten ürün çıkarıldı. ");
+
+        return Ok("Sepetten ürün çıkarıldı.");
     }
 
     [HttpDelete("{userId}/clean")]
     public async Task<ActionResult> CleanBasket(int userId)
     {
         var basket = await _db.Basket
-            
             .Include(b => b.Products)
             .FirstOrDefaultAsync(b => b.UserId == userId);
 
@@ -100,16 +99,14 @@ public class BasketsController: ControllerBase
 
         foreach (var product in basket.Products)
         {
-            product.IncreaseStock();
+            product.IncreaseDynamicStock();
         }
-        
+
         basket.Products.Clear();
         await _db.SaveChangesAsync();
 
-        return Ok("sepetiniz boşaltıldı. ");
-
+        return Ok("Sepetiniz boşaltıldı.");
     }
-    
-    
-
 }
+
+ 
