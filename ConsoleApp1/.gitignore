@@ -1,0 +1,7 @@
+# Derleme çıktıları ve geçici dosyalar
+bin/
+obj/
+
+# Rider/JetBrains IDE ayarları
+.idea/
+
