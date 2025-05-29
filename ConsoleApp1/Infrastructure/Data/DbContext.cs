@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ConsoleApp1.Domain;
+using ConsoleApp1.Domain.Entities;
 
 namespace ConsoleApp1.Data
 {
-    public class BasketDb : DbContext
+    public class DbContext : Microsoft.EntityFrameworkCore.DbContext
     {
-        public BasketDb(DbContextOptions<BasketDb> options)
+        public DbContext(DbContextOptions<DbContext> options)
             : base(options) { }
 
         public DbSet<Product> Products => Set<Product>(); 

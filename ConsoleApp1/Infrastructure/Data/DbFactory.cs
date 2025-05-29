@@ -4,7 +4,7 @@ using ConsoleApp1.Data;
 
 namespace ConsoleApp1.Data
 {
-    public class BasketDbFactory : IDesignTimeDbContextFactory<DbContext>
+    public class DbFactory : IDesignTimeDbContextFactory<DbContext>
     {
         public DbContext CreateDbContext(string[] args)
         {
