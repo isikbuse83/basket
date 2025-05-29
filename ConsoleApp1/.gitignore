@@ -5,3 +5,6 @@ obj/
 # Rider/JetBrains IDE ayarları
 .idea/
 
+# Parent solution / Rider settings
+../.idea/                 # Bir üst dizindeki .idea klasörünü yoksay
+../Folder.DotSettings.user  # Bir üst dizindeki bu ayar dosyasını yoksay
