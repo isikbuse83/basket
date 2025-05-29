@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using ConsoleApp1.Domain;
-
+using ConsoleApp1.Domain.Entities;
 using IModel = RabbitMQ.Client.IModel;
 
 namespace ConsoleApp1.Infrastructure.Services
