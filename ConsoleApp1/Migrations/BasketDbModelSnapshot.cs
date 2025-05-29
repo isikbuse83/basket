@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using DbContext = ConsoleApp1.Data.DbContext;
 
 #nullable disable
 
 namespace ConsoleApp1.Migrations
 {
-    [DbContext(typeof(BasketDb))]
+    [DbContext(typeof(DbContext))]
     partial class BasketDbModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

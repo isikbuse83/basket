@@ -6,12 +6,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using DbContext = ConsoleApp1.Data.DbContext;
 
 #nullable disable
 
 namespace ConsoleApp1.Migrations
 {
-    [DbContext(typeof(BasketDb))]
+    [DbContext(typeof(DbContext))]
     [Migration("20250523141053_Update_Basket")]
     partial class Update_Basket
     {
