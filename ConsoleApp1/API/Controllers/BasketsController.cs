@@ -1,112 +1,64 @@
-﻿using System.Threading.Tasks;
-using ConsoleApp1.Domain;
-using ConsoleApp1.Data;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace ConsoleApp1.Controllers;
-
+﻿using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using ConsoleApp1.Services;
+using System.Threading.Tasks;
+using ConsoleApp1.Reponse;
 
 [ApiController]
 [Route("api/[controller]")]
-
-public class BasketsController: ControllerBase
+public class BasketsController : ControllerBase
 {
-    private readonly BasketDb _db;
-    
-    public BasketsController(BasketDb db)
+    private readonly BasketService _basketService;
+    private readonly IMapper _mapper;
+
+    public BasketsController(BasketService basketService, IMapper mapper)
     {
-        _db = db;
+        _basketService = basketService;
+        _mapper = mapper;
     }
 
     [HttpGet("{userId}")]
-    public async Task<ActionResult> GetBasket(int userId)
+    public async Task<ActionResult<BasketResponse>> GetBasket(int userId)
     {
-        var basket = await _db.Basket
-            .Include(b => b.Products)
-            .FirstOrDefaultAsync(b => b.UserId == userId);
+        var basket = await _basketService.GetBasketAsync(userId);
 
         if (basket == null)
             return NotFound("Sepet bulunamadı");
 
-        return Ok(basket);
+        var basketDto = _mapper.Map<BasketResponse>(basket);
+        return Ok(basketDto);
     }
 
     [HttpPost("{userId}/add/{productId}")]
-    public async Task<ActionResult> AddBasket(int userId, int productId)
+    public async Task<ActionResult<string>> AddToBasket(int userId, int productId)
     {
-        var basket = await _db.Basket
-            .Include(b => b.Products)
-            .FirstOrDefaultAsync(b => b.UserId == userId);
+        var result = await _basketService.AddToBasketAsync(userId, productId);
 
-        var product = await _db.Products.FindAsync(productId);
-        
-        if (basket == null || product == null)
-        {
-            return NotFound("Sepet veya ürün bulunamadı");
-        }
+        if (result.Contains("hata") || result.Contains("bulunamadı") || result.Contains("Yetersiz"))
+            return BadRequest(result);
 
-        if (!product.DecreaseDynamicStock())
-        {
-            return BadRequest("Yetersiz stok");
-        }
-
-        basket.Products.Add(product);
-        await _db.SaveChangesAsync();
-
-        return Ok("Ürün sepete eklendi");
+        return Ok(result);
     }
-    
+
     [HttpDelete("{userId}/remove/{productId}")]
-    public async Task<ActionResult> RemoveBasket(int userId, int productId)
+    public async Task<ActionResult<string>> RemoveFromBasket(int userId, int productId)
     {
-        var basket = await _db.Basket
-            .Include(b => b.Products)
-            .FirstOrDefaultAsync(b => b.UserId == userId);
+        var result = await _basketService.RemoveFromBasketAsync(userId, productId);
 
-        if (basket == null)
-        {
-            return NotFound("Sepet bulunamadı");
-        }
+        if (result.Contains("bulunamadı"))
+            return NotFound(result);
 
-        var product = await _db.Products.FindAsync(productId);
-
-        if (product == null || !basket.Products.Contains(product))
-        {
-            return NotFound("Ürün sepette bulunamadı");
-        }
-
-        basket.Products.Remove(product);
-        product.IncreaseDynamicStock();
-
-        await _db.SaveChangesAsync();
-
-        return Ok("Sepetten ürün çıkarıldı.");
+        return Ok(result);
     }
 
-    [HttpDelete("{userId}/clean")]
-    public async Task<ActionResult> CleanBasket(int userId)
+    [HttpDelete("{userId}/clear")]
+    public async Task<ActionResult<string>> ClearBasket(int userId)
     {
-        var basket = await _db.Basket
-            .Include(b => b.Products)
-            .FirstOrDefaultAsync(b => b.UserId == userId);
+        var result = await _basketService.CleanBasketAsync(userId);
 
-        if (basket == null)
-        {
-            return NotFound("Sepet bulunamadı");
-        }
+        if (result.Contains("bulunamadı"))
+            return NotFound(result);
 
-        foreach (var product in basket.Products)
-        {
-            product.IncreaseDynamicStock();
-        }
-
-        basket.Products.Clear();
-        await _db.SaveChangesAsync();
-
-        return Ok("Sepetiniz boşaltıldı.");
+        return Ok(result);
     }
 }
-
- 

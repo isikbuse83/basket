@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ConsoleApp1.Domain;
-using ConsoleApp1.Data;
+using ConsoleApp1.Services;
+using AutoMapper;
+using ConsoleApp1.DTOs.Request;
+using ConsoleApp1.Reponse;
+using ConsoleApp1.Domain.Entities;
 
 
 namespace ConsoleApp1.Controllers;
@@ -12,38 +15,42 @@ namespace ConsoleApp1.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly BasketDb _context;
+    private readonly ProductService _productService;
+    private readonly IMapper _mapper;
 
-    public ProductsController(BasketDb context)
+    public ProductsController(ProductService productService, IMapper mapper)
     {
-        _context = context;
+        _productService = productService;
+        _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var products = await _context.Products.ToListAsync();
-        return Ok(products);
+        var products = await _productService.GetAllAsync();
+        var productDtos = _mapper.Map<List<ProductResponse>>(products);
+        return Ok(productDtos);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        var product = await _context.Products.FindAsync(id);
+        var product = await _productService.GetByIdAsync(id);
         if (product == null) return NotFound();
-        return Ok(product);
+
+        var productDto = _mapper.Map<ProductResponse>(product);
+        return Ok(productDto);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Product product)
+    public async Task<IActionResult> Create(ProductCreateRequest productCreate)
     {
         try
         {
-            product.SetStock(product.WarehouseStock); // hem Warehouse hem DynamicStock ayarlanır
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+            var productEntity = _mapper.Map<Domain.Product>(productCreate);
+            var created = await _productService.CreateAsync(productEntity);
+            var productResponse = _mapper.Map<ProductResponse>(created);
+            return CreatedAtAction(nameof(Get), new { id = productResponse.Id }, productResponse);
         }
         catch (Exception ex)
         {
@@ -52,29 +59,19 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Product updated)
+    public async Task<IActionResult> Update(int id, ProductUpdateRequest productUpdate)
     {
-        var product = await _context.Products.FindAsync(id);
-        if (product == null) return NotFound();
-
-        product.ProductName = updated.ProductName;
-        product.ProductDescription = updated.ProductDescription;
-        product.ProductPrice = updated.ProductPrice;
-
-        product.SetWarehouseStock(updated.WarehouseStock);
-
-        await _context.SaveChangesAsync();
+        var productEntity = _mapper.Map<Domain.Product>(productUpdate);
+        var success = await _productService.UpdateAsync(id, productEntity);
+        if (!success) return NotFound();
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var product = await _context.Products.FindAsync(id);
-        if (product == null) return NotFound();
-
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
+        var success = await _productService.DeleteAsync(id);
+        if (!success) return NotFound();
         return NoContent();
     }
 }

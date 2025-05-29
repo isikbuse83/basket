@@ -1,56 +1,43 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using ConsoleApp1.Services;
 using System.Threading.Tasks;
-using ConsoleApp1.Domain;
-using ConsoleApp1.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace ConsoleApp1.Controllers;
+using ConsoleApp1.Reponse;
 
 [ApiController]
 [Route("api/[controller]")]
 public class OrderController : ControllerBase
 {
-    private readonly BasketDb _db;
+    private readonly OrderService _orderService;
+    private readonly IMapper _mapper;
 
-    public OrderController(BasketDb db)
+    public OrderController(OrderService orderService, IMapper mapper)
     {
-        _db = db;
+        _orderService = orderService;
+        _mapper = mapper;
     }
 
-    [HttpPost("CompleteOrder/{userId}")]
-    public async Task<IActionResult> CompleteOrder(int userId)
+    [HttpPost("complete/{userId}")]
+    public async Task<ActionResult> CompleteOrder(int userId)
     {
-        var basket = await _db.Basket
-            .Include(b => b.Products)
-            .FirstOrDefaultAsync(b => b.UserId == userId);
+        var (success, message) = await _orderService.CompleteOrderAsync(userId);
 
-        if (basket == null || basket.Products.Count == 0)
-            return BadRequest("Sepet boş veya bulunamadı.");
+        if (!success)
+            return BadRequest(message);
 
-        using var transaction = await _db.Database.BeginTransactionAsync();
+        return Ok(message);
+    }
 
-        try
-        {
-            foreach (var product in basket.Products)
-            {
-                if (!product.DecreaseDynamicStock())
-                    return BadRequest($"Yetersiz stok: Ürün ID = {product.Id}");
+    // Eğer sipariş detaylarını almak istersen:
+    [HttpGet("{orderId}")]
+    public async Task<ActionResult<OrderResponse>> GetOrder(int orderId)
+    {
+        var order = await _orderService.GetOrderByIdAsync(orderId);
 
-                // Eğer WarehouseStock'u güncellemek istiyorsan, Product entity'sine uygun bir method eklemelisin.
-            }
+        if (order == null)
+            return NotFound("Sipariş bulunamadı");
 
-            basket.Products.Clear();
-
-            await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return Ok("Sipariş başarıyla oluşturuldu.");
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            return StatusCode(500, "Sipariş oluşturulurken hata oluştu: " + ex.Message);
-        }
+        var orderDto = _mapper.Map<OrderResponse>(order);
+        return Ok(orderDto);
     }
 }

@@ -1,79 +1,68 @@
-﻿using System.Threading.Tasks;
-using ConsoleApp1.Data;
-using ConsoleApp1.Domain;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using ConsoleApp1.Services;
+using AutoMapper;
+using ConsoleApp1.DTOs.Request;
+using ConsoleApp1.Domain.Entities;
+using ConsoleApp1.DTOs.Response;
+
 
 namespace ConsoleApp1.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
 public class UsersController : ControllerBase
 {
-    private readonly BasketDb _db;
+    private readonly UserService _userService;
+    private readonly IMapper _mapper;
 
-    public UsersController(BasketDb db)
+    public UsersController(UserService userService, IMapper mapper)
     {
-        _db = db;
+        _userService = userService;
+        _mapper = mapper;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var users = await _db.Users.ToListAsync();
-        return Ok(users);
+        var users = await _userService.GetAllUsersAsync();
+        var userDtos = _mapper.Map<List<UserResponse>>(users);
+        return Ok(userDtos);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        var user = await _db.Users.FindAsync(id);
-        if (user == null)
-        {
-            return NotFound();
-        }
-        return Ok(user);
+        var user = await _userService.GetUserByIdAsync(id);
+        if (user == null) return NotFound();
+
+        var userDto = _mapper.Map<UserResponse>(user);
+        return Ok(userDto);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(User user)
+    public async Task<IActionResult> Create(UserCreateRequest userCreate)
     {
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(Get), new { id = user.UserId }, user);
+        var userEntity = _mapper.Map<Domain.User>(userCreate);
+        var createdUser = await _userService.CreateUserAsync(userEntity);
+        var userResponse = _mapper.Map<UserResponse>(createdUser);
+        
+        return CreatedAtAction(nameof(Get), new { id = userResponse.UserId }, userResponse);
     }
 
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, User updated)
+    public async Task<IActionResult> Update(int id, UserUpdateRequest userUpdate)
     {
-        var user = await _db.Users.FindAsync(id);
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        user.UserName = updated.UserName;
-        user.Password = updated.Password;
-        user.Email = updated.Email;
-        
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var userEntity = _mapper.Map<Domain.User>(userUpdate);
+        var result = await _userService.UpdateUserAsync(id, userEntity);
+        return result ? NoContent() : NotFound();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var user = await _db.Users.FindAsync(id);
-        if (user == null)
-        {
-            return NotFound();
-        }
-        _db.Users.Remove(user);
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var result = await _userService.DeleteUserAsync(id);
+        return result ? NoContent() : NotFound();
     }
-    
 }
