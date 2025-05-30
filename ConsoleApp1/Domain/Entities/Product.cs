@@ -1,18 +1,14 @@
 ﻿namespace ConsoleApp1.Domain.Entities
 {
-    
     public class Product
     {
         public int Id { get; set; }
         public string ProductName { get; set; }
         public string ProductDescription { get; set; }
         public decimal ProductPrice { get; set; }
-
         public int WarehouseStock { get; private set; }
-
         public int DynamicStock { get; private set; }
-
-
+        
         public Product SetStock(int warehouseStock)
         {
             //one is a stock connected to the warehouse and the other
@@ -22,13 +18,14 @@
             return this;
         }
 
-        public bool DecreaseDynamicStock(int quantity = 1)
+        public void DecreaseDynamicStock()
         {
-            if (WarehouseStock - DynamicStock <= 0)
-                return false;
+            DynamicStock--;
+        }
 
-            DynamicStock++; 
-            return true;
+        public bool HasDynamicStock()
+        {
+            return WarehouseStock - DynamicStock < 0;
         }
 
         public void IncreaseDynamicStock(int quantity = 1)
@@ -45,8 +42,4 @@
             throw new System.NotImplementedException();
         }
     }
-
-    
 }
-
-
