@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
 using AutoMapper;
-using ConsoleApp1.Services;
-using System.Threading.Tasks;
-using ConsoleApp1.Reponse;
+using ConsoleApp1.Application.Services;
+using ConsoleApp1.DTOs.Response;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ConsoleApp1.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -27,8 +29,7 @@ public class OrderController : ControllerBase
 
         return Ok(message);
     }
-
-    // Eğer sipariş detaylarını almak istersen:
+    
     [HttpGet("{orderId}")]
     public async Task<ActionResult<OrderResponse>> GetOrder(int orderId)
     {

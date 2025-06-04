@@ -1,47 +1,44 @@
 ﻿using System;
 using System.Threading.Tasks;
-using ConsoleApp1.Data;
-using ConsoleApp1.Domain;
 using ConsoleApp1.Domain.Entities;
+using ConsoleApp1.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using ConsoleApp1.Infrastructure.Services;
-using DbContext = ConsoleApp1.Data.DbContext;
 
-namespace ConsoleApp1.Services
+namespace ConsoleApp1.Application.Services
 {
     public class OrderService
     {
-        private readonly DbContext _dbContext;
+        private readonly BasketDbContext _basketDbContext;
         private readonly RabbitMQPublisher _rabbitMQPublisher;
 
-        public OrderService(DbContext dbContext, RabbitMQPublisher rabbitMQPublisher)
+        public OrderService(BasketDbContext basketDbContext, RabbitMQPublisher rabbitMQPublisher)
         {
-            _dbContext = dbContext;
+            _basketDbContext = basketDbContext;
             _rabbitMQPublisher = rabbitMQPublisher;
         }
 
         public async Task<(bool Success, string Message)> CompleteOrderAsync(int userId)
         {
-            var basket = await _dbContext.Basket
-                .Include(b => b.BasketItems)
+            var basket = await _basketDbContext.Basket
+                .Include(b => b.Items)
                     .ThenInclude(bi => bi.Product)
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
-            if (basket == null || basket.BasketItems.Count == 0)
+            if (basket == null || basket.Items.Count == 0)
                 return (false, "Sepet boş veya bulunamadı.");
 
-            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            using var transaction = await _basketDbContext.Database.BeginTransactionAsync();
 
             try
             {
-                foreach (var basketItem in basket.BasketItems)
+                foreach (var basketItem in basket.Items)
                 {
                     var product = basketItem.Product;
 
                     
                     for (int i = 0; i < basketItem.Quantity; i++)
                     {
-                        if (!product.DecreaseDynamicStock())
+                        if (!product.HasDynamicStock())
                             return (false, $"Yetersiz stok: Ürün ID = {product.Id}");
                     }
 
@@ -53,13 +50,13 @@ namespace ConsoleApp1.Services
                         UserId = userId
                     };
 
-                    _dbContext.Order.Add(order);
+                    _basketDbContext.Order.Add(order);
                     _rabbitMQPublisher.PublishOrder(order);
                 }
 
-                basket.BasketItems.Clear();
+                basket.ClearBasket();
 
-                await _dbContext.SaveChangesAsync();
+                await _basketDbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return (true, "Sipariş başarıyla oluşturuldu.");

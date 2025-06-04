@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
 using AutoMapper;
-using ConsoleApp1.Services;
-using System.Threading.Tasks;
-using ConsoleApp1.Reponse;
+using ConsoleApp1.Application.Services;
+using ConsoleApp1.DTOs.Response;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ConsoleApp1.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]/{userId:int}")]
 public class BasketsController : ControllerBase
 {
     private readonly BasketService _basketService;
@@ -17,7 +19,7 @@ public class BasketsController : ControllerBase
         _mapper = mapper;
     }
 
-    [HttpGet("{userId}")]
+    [HttpGet]
     public async Task<ActionResult<BasketResponse>> GetBasket(int userId)
     {
         var basket = await _basketService.GetBasketAsync(userId);
@@ -29,7 +31,7 @@ public class BasketsController : ControllerBase
         return Ok(basketDto);
     }
 
-    [HttpPost("{userId}/add/{productId}")]
+    [HttpPost("add/{productId:int}")]
     public async Task<ActionResult<string>> AddToBasket(int userId, int productId)
     {
         var result = await _basketService.AddToBasketAsync(userId, productId);
@@ -40,7 +42,7 @@ public class BasketsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpDelete("{userId}/remove/{productId}")]
+    [HttpDelete("remove/{productId:int}")]
     public async Task<ActionResult<string>> RemoveFromBasket(int userId, int productId)
     {
         var result = await _basketService.RemoveFromBasketAsync(userId, productId);
@@ -51,7 +53,7 @@ public class BasketsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpDelete("{userId}/clear")]
+    [HttpDelete("clear")]
     public async Task<ActionResult<string>> ClearBasket(int userId)
     {
         var result = await _basketService.CleanBasketAsync(userId);

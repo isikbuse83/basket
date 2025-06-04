@@ -1,18 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using ConsoleApp1.Data;
 
-namespace ConsoleApp1.Data
+namespace ConsoleApp1.Infrastructure.Data
 {
-    public class DbFactory : IDesignTimeDbContextFactory<DbContext>
+    public class DbFactory : IDesignTimeDbContextFactory<BasketDbContext>
     {
-        public DbContext CreateDbContext(string[] args)
+        public BasketDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<DbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<BasketDbContext>();
             optionsBuilder.UseSqlServer(
-                "Server=LAPTOP-6PECIQ5E\\SQLEXPRESS;Database=Basket;Trusted_Connection=True;TrustServerCertificate=True;");
+                "Server=LAPTOP-6PECIQ5E\\SQLEXPRESS;Database=BasketDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
-            return new DbContext(optionsBuilder.Options);
+            return new BasketDbContext(optionsBuilder.Options);
         }
     }
 

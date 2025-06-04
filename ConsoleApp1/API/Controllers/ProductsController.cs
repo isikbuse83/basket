@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using ConsoleApp1.Services;
 using AutoMapper;
-using ConsoleApp1.DTOs.Request;
-using ConsoleApp1.Reponse;
+using ConsoleApp1.Application.Services;
 using ConsoleApp1.Domain.Entities;
+using ConsoleApp1.DTOs.Request;
+using ConsoleApp1.DTOs.Response;
+using Microsoft.AspNetCore.Mvc;
 
-
-namespace ConsoleApp1.Controllers;
+namespace ConsoleApp1.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -47,7 +46,7 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            var productEntity = _mapper.Map<Domain.Product>(productCreate);
+            var productEntity = _mapper.Map<Product>(productCreate);
             var created = await _productService.CreateAsync(productEntity);
             var productResponse = _mapper.Map<ProductResponse>(created);
             return CreatedAtAction(nameof(Get), new { id = productResponse.Id }, productResponse);
@@ -61,7 +60,7 @@ public class ProductsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, ProductUpdateRequest productUpdate)
     {
-        var productEntity = _mapper.Map<Domain.Product>(productUpdate);
+        var productEntity = _mapper.Map<Product>(productUpdate);
         var success = await _productService.UpdateAsync(id, productEntity);
         if (!success) return NotFound();
         return NoContent();

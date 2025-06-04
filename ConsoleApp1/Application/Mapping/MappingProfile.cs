@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-
 using ConsoleApp1.Domain.Entities;
 using ConsoleApp1.DTOs.Request;
 using ConsoleApp1.DTOs.Response;
-using ConsoleApp1.Reponse;
 
-namespace ConsoleApp1.Infrastructure
+namespace ConsoleApp1.Application.Mapping
 {
     
     public class MappingProfile : Profile
@@ -14,9 +12,6 @@ namespace ConsoleApp1.Infrastructure
         {
             // Entity -> Response DTO
             CreateMap<User, UserResponse>();
-            CreateMap<Product, ProductResponse>();
-            CreateMap<BasketItem, BasketItemResponse>();
-            CreateMap<Basket, BasketResponse>();
             CreateMap<Order, OrderResponse>();
         
      
@@ -31,7 +26,15 @@ namespace ConsoleApp1.Infrastructure
             CreateMap<ProductCreateRequest, Product>();
             CreateMap<ProductUpdateRequest, Product>();
             CreateMap<Product, ProductResponse>();
+            
+            CreateMap<Basket, BasketResponse>()
+                .ForMember(dest => dest.BasketId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.BasketItems, opt => opt.MapFrom(src => src.Items));
 
+            CreateMap<BasketItem, BasketItemResponse>()
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
+            
         }
     }
     

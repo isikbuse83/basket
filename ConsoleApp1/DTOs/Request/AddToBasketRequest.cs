@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+namespace ConsoleApp1.DTOs.Request;
+
 public class AddToBasketRequest
 {
     [Required]

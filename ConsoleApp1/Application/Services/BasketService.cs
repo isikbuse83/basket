@@ -2,121 +2,128 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using ConsoleApp1.Domain.Entities;
-using ConsoleApp1.Reponse;
+using ConsoleApp1.DTOs.Response;
+using ConsoleApp1.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using DbContext = ConsoleApp1.Data.DbContext;
 
-namespace ConsoleApp1.Services
+namespace ConsoleApp1.Application.Services
 {
     public class BasketService
     {
-        private readonly DbContext _dbContext;
+        private readonly BasketDbContext _basketDbContext;
         private readonly IMapper _mapper;
 
-        public BasketService(DbContext dbContext, IMapper mapper)
+        public BasketService(BasketDbContext basketDbContext, IMapper mapper)
         {
-            _dbContext = dbContext;
+            _basketDbContext = basketDbContext;
             _mapper = mapper;
         }
-
-        // Artık domain Basket değil BasketResponseDto dönecek
+        
         public async Task<BasketResponse> GetBasketAsync(int userId)
         {
-            var basket = await _dbContext.Basket
-                .Include(b => b.BasketItems)
-                    .ThenInclude(bi => bi.Product)
+            var basket = await _basketDbContext.Basket
+                .AsSplitQuery() //performans
+                .Include(b => b.Items)
+                .ThenInclude(bi => bi.Product)
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
-            if (basket == null)
-                return null;
-
-            return _mapper.Map<BasketResponse>(basket);
+            return basket == null ? null : _mapper.Map<BasketResponse>(basket);
         }
 
         public async Task<string> AddToBasketAsync(int userId, int productId)
         {
-            var basket = await _dbContext.Basket
-                .Include(b => b.BasketItems)
-                .FirstOrDefaultAsync(b => b.UserId == userId);
-
-            if (basket == null)
-            {
-                
-                basket = new Basket { UserId = userId };
-                await _dbContext.Basket.AddAsync(basket);
-                await _dbContext.SaveChangesAsync();
-            }
-
-            var product = await _dbContext.Products.FindAsync(productId);
+            var product = await _basketDbContext.Products.FindAsync(productId);
+            
             if (product == null)
                 return "Ürün bulunamadı";
 
-            if (!product.DecreaseDynamicStock())
+            if (!product.HasDynamicStock())
                 return "Yetersiz stok";
+            
+            var basket = await GetBasketByUserId(userId);
 
-            var basketItem = basket.BasketItems.FirstOrDefault(bi => bi.ProductId == productId);
-            if (basketItem != null)
-            {
-                basketItem.Quantity++;
-            }
-            else
-            {
-                basket.BasketItems.Add(new BasketItem
-                {
-                    ProductId = productId,
-                    Quantity = 1,
-                    Basket = basket
-                });
-            }
+            var basketItem = GetBasketItem(productId, basket);
+            basketItem.IncreaseQuantity();
 
-            await _dbContext.SaveChangesAsync();
+            product.DecreaseDynamicStock();
+
+            await _basketDbContext.SaveChangesAsync();
 
             return "Ürün sepete eklendi";
         }
 
+        private static BasketItem GetBasketItem(int productId, Basket basket)
+        {
+            var basketItem = basket.Items.FirstOrDefault(bi => bi.ProductId == productId);
+
+            if (basketItem != null)
+            {
+                return basketItem;
+            }
+            
+            var newBasketItem = new BasketItem(productId);
+            basket.AddBasketItem(newBasketItem);
+            
+            return newBasketItem;
+        }
+
+        private async Task<Basket> GetBasketByUserId(int userId)
+        {
+            var basket = await _basketDbContext.Basket
+                .Include(b => b.Items)
+                .FirstOrDefaultAsync(b => b.UserId == userId);
+
+            if (basket != null) return basket;
+            
+            basket = new Basket(userId);
+            await _basketDbContext.Basket.AddAsync(basket);
+
+            return basket;
+        }
+
         public async Task<string> RemoveFromBasketAsync(int userId, int productId)
         {
-            var basket = await _dbContext.Basket
-                .Include(b => b.BasketItems)
+            var basket = await _basketDbContext.Basket
+                .Include(b => b.Items)
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
             if (basket == null)
                 return "Sepet bulunamadı";
 
-            var basketItem = basket.BasketItems.FirstOrDefault(bi => bi.ProductId == productId);
+            var basketItem = basket.Items.FirstOrDefault(bi => bi.ProductId == productId);
             if (basketItem == null)
                 return "Ürün sepette bulunamadı";
 
-            basket.BasketItems.Remove(basketItem);
+            basket.RemoveBasketItem(basketItem);
 
-            var product = await _dbContext.Products.FindAsync(productId);
+            var product = await _basketDbContext.Products.FindAsync(productId);
             product?.IncreaseDynamicStock();
 
-            await _dbContext.SaveChangesAsync();
+            await _basketDbContext.SaveChangesAsync();
 
             return "Sepetten ürün çıkarıldı.";
         }
 
         public async Task<string> CleanBasketAsync(int userId)
         {
-            var basket = await _dbContext.Basket
-                .Include(b => b.BasketItems)
+            var basket = await _basketDbContext.Basket
+                .Include(b => b.Items)
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
             if (basket == null)
                 return "Sepet bulunamadı";
 
-            foreach (var basketItem in basket.BasketItems)
+            foreach (var basketItem in basket.Items)
             {
-                var product = await _dbContext.Products.FindAsync(basketItem.ProductId);
+                var product = await _basketDbContext.Products.FindAsync(basketItem.ProductId);
                 product?.IncreaseDynamicStock();
             }
 
-            basket.BasketItems.Clear();
-            await _dbContext.SaveChangesAsync();
+            basket.ClearBasket();
+            
+            await _basketDbContext.SaveChangesAsync();
 
             return "Sepetiniz boşaltıldı.";
         }
     }
 }
-

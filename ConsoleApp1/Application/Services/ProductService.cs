@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using ConsoleApp1.Domain.Entities;
+using ConsoleApp1.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using DbContext = ConsoleApp1.Data.DbContext;
 
-namespace ConsoleApp1.Services
+namespace ConsoleApp1.Application.Services
 {
     public class ProductService
     {
-        private readonly DbContext _context;
+        private readonly BasketDbContext _context;
 
-        public ProductService(DbContext context)
+        public ProductService(BasketDbContext context)
         {
             _context = context;
         }

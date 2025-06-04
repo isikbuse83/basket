@@ -1,5 +1,5 @@
 ﻿
-namespace ConsoleApp1.Reponse
+namespace ConsoleApp1.DTOs.Response
 {
     public class ProductResponse
     {

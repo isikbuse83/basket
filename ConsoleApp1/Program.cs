@@ -1,13 +1,12 @@
 ﻿using System;
-using ConsoleApp1.Infrastructure;
+using ConsoleApp1.Application.Mapping;
+using ConsoleApp1.Application.Services;
+using ConsoleApp1.Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using ConsoleApp1.Infrastructure.Services;
-using ConsoleApp1.Services;
-using DbContext = ConsoleApp1.Data.DbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,14 +27,19 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 
 // DbContext kayıt
-builder.Services.AddDbContext<DbContext>(options =>
+builder.Services.AddDbContext<BasketDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+//auto mapper projenin tamamına eklensin diye 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
-// Swagger root yönlendirmesi
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.Use(async (context, next) =>
 {
     if (context.Request.Path == "/")
@@ -46,13 +50,6 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Swagger sadece geliştirme ortamında aktif
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.UseAuthorization();
 app.MapControllers();
-app.Run();
+await app.RunAsync();
