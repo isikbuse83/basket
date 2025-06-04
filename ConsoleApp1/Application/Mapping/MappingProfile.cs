@@ -13,19 +13,16 @@ namespace ConsoleApp1.Application.Mapping
             // Entity -> Response DTO
             CreateMap<User, UserResponse>();
             CreateMap<Order, OrderResponse>();
-        
-     
+            CreateMap<Product, ProductResponse>();
 
+            
             // Request DTO -> Entity
-            CreateMap<AddToBasketRequest, BasketItem>()
-                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity));
 
             CreateMap<UserCreateRequest, User>();
             CreateMap<UserUpdateRequest, User>();
 
             CreateMap<ProductCreateRequest, Product>();
             CreateMap<ProductUpdateRequest, Product>();
-            CreateMap<Product, ProductResponse>();
             
             CreateMap<Basket, BasketResponse>()
                 .ForMember(dest => dest.BasketId, opt => opt.MapFrom(src => src.Id))
