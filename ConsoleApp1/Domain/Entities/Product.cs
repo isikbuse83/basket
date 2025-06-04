@@ -25,7 +25,8 @@
 
         public bool HasDynamicStock()
         {
-            return WarehouseStock - DynamicStock < 0;
+            return DynamicStock > 0 && WarehouseStock > 0;
+            
         }
 
         public void IncreaseDynamicStock(int quantity = 1)

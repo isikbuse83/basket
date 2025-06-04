@@ -6,7 +6,7 @@ namespace ConsoleApp1.Domain.Entities
     public class BasketItem
     {
         public int ProductId { get; private set; }
-        public Product Product { get; }
+        public Product Product { get; set; }
     
         public int Quantity { get; private set; }
 

@@ -2,11 +2,11 @@
 
 namespace ConsoleApp1.DTOs.Request.Validators;
 
-public class UserCreateRequestValidator: AbstractValidator<UserCreateRequest>
+public class UserUpdateRequestValidator: AbstractValidator<UserUpdateRequest>
 {
-    public UserCreateRequestValidator()
+    public UserUpdateRequestValidator()
     {
-        RuleFor(x => x.Name)
+        RuleFor(x => x.UserName)
             .NotEmpty().WithMessage("Name boş olamaz.")
             .MinimumLength(3).WithMessage("Name alanı en az 3 karakterli olmalıdır");
         
