@@ -30,12 +30,12 @@ public class RabbitMQConsumerService : BackgroundService
         {
             var json = Encoding.UTF8.GetString(ea.Body.ToArray());
             var orderDto = JsonSerializer.Deserialize<OrderResponse>(json);
-            Console.WriteLine($"📦 Sipariş: {orderDto.User.UserName} - {orderDto.Product.ProductName} x{orderDto.Quantity}");
+            Console.WriteLine($" Sipariş: {orderDto.User.UserName} - {orderDto.Product.ProductName} x{orderDto.Quantity}");
         };
 
         channel.BasicConsume(queue: QueueName, autoAck: true, consumer: consumer);
 
-        Console.WriteLine("🔁 Sipariş kuyruğu dinleniyor...");
+        Console.WriteLine("Sipariş kuyruğu dinleniyor...");
 
         // BackgroundService sonsuz döngüye girmemeli, task olarak çalışmalı
         return Task.CompletedTask;

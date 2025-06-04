@@ -6,9 +6,6 @@ public class ProductCreateRequestValidator: AbstractValidator<ProductCreateReque
 {
     public ProductCreateRequestValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("ürün adı boş olamaz.");
-
         RuleFor(x => x.Price)
             .NotEmpty().WithMessage("fiyat alanı boş olamaz");
 
