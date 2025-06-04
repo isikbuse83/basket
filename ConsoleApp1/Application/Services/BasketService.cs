@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ConsoleApp1.Domain.Entities;
@@ -22,23 +24,37 @@ namespace ConsoleApp1.Application.Services
         public async Task<BasketResponse> GetBasketAsync(int userId)
         {
             var basket = await _basketDbContext.Basket
-                .AsSplitQuery() //performans
-                .Include(b => b.Items)
-                .ThenInclude(bi => bi.Product)
+                .Include(b => b.Items)  // sadece Items, Product değil
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
-            return basket == null ? null : _mapper.Map<BasketResponse>(basket);
+            if (basket == null) throw new InvalidOperationException("Sepet bulunamdı.");
+
+            // Sepetteki ürün id'lerini al
+            var productIds = basket.Items.Select(i => i.ProductId).ToList();
+
+            // Ürünleri ayrı sorgu ile çek
+            var products = await _basketDbContext.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync();
+
+            // Product nesnelerini basket itemlara manuel set et
+            foreach (var item in basket.Items)
+            {
+                item.Product = products.FirstOrDefault(p => p.Id == item.ProductId);
+            }
+
+            return _mapper.Map<BasketResponse>(basket);
         }
 
-        public async Task<string> AddToBasketAsync(int userId, int productId)
+
+        public async Task AddToBasketAsync(int userId, int productId)
         {
             var product = await _basketDbContext.Products.FindAsync(productId);
             
             if (product == null)
-                return "Ürün bulunamadı";
+                throw new InvalidDataException("Ürün bulunamadı.");
 
-            if (!product.HasDynamicStock())
-                return "Yetersiz stok";
+            if (!product.HasDynamicStock()) throw new InvalidOperationException("Ürün bulunamadı.");
             
             var basket = await GetBasketByUserId(userId);
 
@@ -48,8 +64,6 @@ namespace ConsoleApp1.Application.Services
             product.DecreaseDynamicStock();
 
             await _basketDbContext.SaveChangesAsync();
-
-            return "Ürün sepete eklendi";
         }
 
         private static BasketItem GetBasketItem(int productId, Basket basket)
@@ -81,18 +95,18 @@ namespace ConsoleApp1.Application.Services
             return basket;
         }
 
-        public async Task<string> RemoveFromBasketAsync(int userId, int productId)
+        public async Task RemoveFromBasketAsync(int userId, int productId)
         {
             var basket = await _basketDbContext.Basket
                 .Include(b => b.Items)
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
             if (basket == null)
-                return "Sepet bulunamadı";
+                throw new InvalidOperationException("Sepet bulunamadı");
 
             var basketItem = basket.Items.FirstOrDefault(bi => bi.ProductId == productId);
             if (basketItem == null)
-                return "Ürün sepette bulunamadı";
+                throw new InvalidOperationException("Silinmek istenen ürün bulunamadı");
 
             basket.RemoveBasketItem(basketItem);
 
@@ -100,18 +114,15 @@ namespace ConsoleApp1.Application.Services
             product?.IncreaseDynamicStock();
 
             await _basketDbContext.SaveChangesAsync();
-
-            return "Sepetten ürün çıkarıldı.";
         }
 
-        public async Task<string> CleanBasketAsync(int userId)
+        public async Task CleanBasketAsync(int userId)
         {
             var basket = await _basketDbContext.Basket
                 .Include(b => b.Items)
                 .FirstOrDefaultAsync(b => b.UserId == userId);
 
-            if (basket == null)
-                return "Sepet bulunamadı";
+            if (basket == null) throw new InvalidOperationException("Sepet bulunamadı");
 
             foreach (var basketItem in basket.Items)
             {
@@ -122,8 +133,6 @@ namespace ConsoleApp1.Application.Services
             basket.ClearBasket();
             
             await _basketDbContext.SaveChangesAsync();
-
-            return "Sepetiniz boşaltıldı.";
         }
     }
 }
