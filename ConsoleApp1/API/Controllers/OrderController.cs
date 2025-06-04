@@ -18,16 +18,16 @@ public class OrderController : ControllerBase
         _orderService = orderService;
         _mapper = mapper;
     }
-
+    
     [HttpPost("complete/{userId}")]
     public async Task<ActionResult> CompleteOrder(int userId)
     {
-        var (success, message) = await _orderService.CompleteOrderAsync(userId);
+        var result = await _orderService.CompleteOrderAsync(userId);
 
-        if (!success)
-            return BadRequest(message);
+        if (result.Orders == null || result.Orders.Count == 0)
+            return BadRequest(result.Message);
 
-        return Ok(message);
+        return Ok(result);
     }
     
     [HttpGet("{orderId}")]
@@ -41,4 +41,5 @@ public class OrderController : ControllerBase
         var orderDto = _mapper.Map<OrderResponse>(order);
         return Ok(orderDto);
     }
+
 }

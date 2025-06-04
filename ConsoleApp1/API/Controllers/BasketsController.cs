@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
 using ConsoleApp1.Application.Services;
+using ConsoleApp1.DTOs.Request;
 using ConsoleApp1.DTOs.Response;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,49 +19,37 @@ public class BasketsController : ControllerBase
         _basketService = basketService;
         _mapper = mapper;
     }
-
+    
     [HttpGet]
     public async Task<ActionResult<BasketResponse>> GetBasket(int userId)
     {
         var basket = await _basketService.GetBasketAsync(userId);
 
-        if (basket == null)
-            return NotFound("Sepet bulunamadı");
-
         var basketDto = _mapper.Map<BasketResponse>(basket);
         return Ok(basketDto);
     }
 
-    [HttpPost("add/{productId:int}")]
-    public async Task<ActionResult<string>> AddToBasket(int userId, int productId)
+    [HttpPost("add")]
+    public async Task<ActionResult> AddToBasket(int userId, [FromBody] AddToBasketRequest request)
     {
-        var result = await _basketService.AddToBasketAsync(userId, productId);
+        await _basketService.AddToBasketAsync(userId, request.ProductId);
 
-        if (result.Contains("hata") || result.Contains("bulunamadı") || result.Contains("Yetersiz"))
-            return BadRequest(result);
-
-        return Ok(result);
+        return Ok();
     }
 
     [HttpDelete("remove/{productId:int}")]
-    public async Task<ActionResult<string>> RemoveFromBasket(int userId, int productId)
+    public async Task<ActionResult> RemoveFromBasket(int userId, int productId)
     {
-        var result = await _basketService.RemoveFromBasketAsync(userId, productId);
+         await _basketService.RemoveFromBasketAsync(userId, productId);
 
-        if (result.Contains("bulunamadı"))
-            return NotFound(result);
-
-        return Ok(result);
+        return Ok();
     }
 
     [HttpDelete("clear")]
-    public async Task<ActionResult<string>> ClearBasket(int userId)
+    public async Task<ActionResult> ClearBasket(int userId)
     {
-        var result = await _basketService.CleanBasketAsync(userId);
-
-        if (result.Contains("bulunamadı"))
-            return NotFound(result);
-
-        return Ok(result);
+         await _basketService.CleanBasketAsync(userId);
+         
+        return Ok();
     }
 }

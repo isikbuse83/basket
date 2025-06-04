@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using ConsoleApp1.Application.Services;
@@ -31,7 +30,7 @@ public class ProductsController : ControllerBase
         return Ok(productDtos);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
         var product = await _productService.GetByIdAsync(id);
@@ -42,27 +41,24 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ProductCreateRequest productCreate)
+    public async Task<IActionResult> Create([FromBody] ProductCreateRequest productCreate)
     {
-        try
-        {
-            var productEntity = _mapper.Map<Product>(productCreate);
-            var created = await _productService.CreateAsync(productEntity);
-            var productResponse = _mapper.Map<ProductResponse>(created);
-            return CreatedAtAction(nameof(Get), new { id = productResponse.Id }, productResponse);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Bir hata oluştu: {ex.Message}");
-        }
+        var productEntity = _mapper.Map<Product>(productCreate);
+        productEntity.SetStock(productCreate.WarehouseStock);
+
+        var created = await _productService.CreateAsync(productEntity);
+        var productResponse = _mapper.Map<ProductResponse>(created);
+
+        return CreatedAtAction(nameof(Get), new { id = productResponse.Id }, productResponse);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ProductUpdateRequest productUpdate)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] ProductUpdateRequest productUpdate)
     {
         var productEntity = _mapper.Map<Product>(productUpdate);
         var success = await _productService.UpdateAsync(id, productEntity);
         if (!success) return NotFound();
+
         return NoContent();
     }
 
@@ -71,6 +67,7 @@ public class ProductsController : ControllerBase
     {
         var success = await _productService.DeleteAsync(id);
         if (!success) return NotFound();
+
         return NoContent();
     }
 }

@@ -41,17 +41,17 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(UserCreateRequest userCreate)
+    public async Task<IActionResult> Create([FromBody] UserCreateRequest userCreate)
     {
         var userEntity = _mapper.Map<User>(userCreate);
         var createdUser = await _userService.CreateUserAsync(userEntity);
         var userResponse = _mapper.Map<UserResponse>(createdUser);
-        
+
         return CreatedAtAction(nameof(Get), new { id = userResponse.UserId }, userResponse);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UserUpdateRequest userUpdate)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UserUpdateRequest userUpdate)
     {
         var userEntity = _mapper.Map<User>(userUpdate);
         var result = await _userService.UpdateUserAsync(id, userEntity);
