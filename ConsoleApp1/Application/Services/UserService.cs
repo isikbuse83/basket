@@ -37,7 +37,6 @@ namespace ConsoleApp1.Application.Services
             var user = await _basketDbContext.Users.FindAsync(id);
             if (user == null) return false;
 
-            user.Password = updated.Password;
             user.Email = updated.Email;
                 
             await _basketDbContext.SaveChangesAsync();

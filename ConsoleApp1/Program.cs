@@ -4,6 +4,7 @@ using ConsoleApp1.Application.Mapping;
 using ConsoleApp1.Application.Services;
 using ConsoleApp1.DTOs.Request.Validators;
 using ConsoleApp1.Infrastructure.Data;
+using ConsoleApp1.Test;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -73,5 +74,7 @@ app.Use(async (context, next) =>
 app.UseExceptionHandler(); // Global hata middleware
 app.UseAuthorization();
 app.MapControllers();
+
+UserTest.UserCreateSuccess();
 
 await app.RunAsync();
